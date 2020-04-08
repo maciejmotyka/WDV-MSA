@@ -1,0 +1,20 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+plan <- drake::drake_plan(
+  aBayesQR_001_haps = {
+    files <- list.files("/home/lejno/Desktop/aBayesQR-nf/out_bwa_001/haplotypes", full.names = T, pattern = "*.fasta")
+    aBayesQR_001_haps <- Biostrings::readDNAStringSet(files)
+    aBayesQR_001_haps
+    },
+  # aBayesQR_001_Muscle = msa::msa(aBayesQR_001_haps, method = "Muscle"),
+  aBayesQR_001_ClustalO = msa::msa(aBayesQR_001_haps, method = "ClustalOmega"),
+  aBayesQR_001_ClustalW = msa::msa(aBayesQR_001_haps, method = "ClustalW"),
+)
+drake::outdated(plan)
+drake::make(plan, jobs = 8)
+```
+
