@@ -1,0 +1,30 @@
+---
+title: "WDV MSA"
+author: "Maciej Motyka"
+date: "4/8/2020"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+drake::readd(aBayesQR_001_haps)
+```
+
+```{r}
+drake::loadd(aBayesQR_001_ClustalO)
+print(aBayesQR_001_ClustalO)
+```
+
+```{r}
+drake::loadd(aBayesQR_001_ClustalW)
+print(aBayesQR_001_ClustalW)
+```
+
+

@@ -13,6 +13,13 @@ plan <- drake::drake_plan(
   # aBayesQR_001_Muscle = msa::msa(aBayesQR_001_haps, method = "Muscle"),
   aBayesQR_001_ClustalO = msa::msa(aBayesQR_001_haps, method = "ClustalOmega"),
   aBayesQR_001_ClustalW = msa::msa(aBayesQR_001_haps, method = "ClustalW"),
+  
+  # Make report
+  report = rmarkdown::render(
+    input = drake::knitr_in("test_report.Rmd"),
+    output_file = drake::file_out("test_report.html"),
+    quiet = T
+    )
 )
 drake::outdated(plan)
 drake::make(plan, jobs = 8)
