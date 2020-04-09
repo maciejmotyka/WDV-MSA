@@ -4,22 +4,79 @@ output: html_notebook
 ---
 
 ```{r}
+library(msa)
+library(magrittr)
+```
+
+
+```{r}
 plan <- drake::drake_plan(
-  aBayesQR_001_haps = {
+  
+  # Align aBayes_001 haps using Muscle, ClustalO and ClustalW with default settings
+  abqr001_haps = {
     files <- list.files("/home/lejno/Desktop/aBayesQR-nf/out_bwa_001/haplotypes", full.names = T, pattern = "*.fasta")
-    aBayesQR_001_haps <- Biostrings::readDNAStringSet(files)
-    aBayesQR_001_haps
-    },
-  # aBayesQR_001_Muscle = msa::msa(aBayesQR_001_haps, method = "Muscle"),
-  aBayesQR_001_ClustalO = msa::msa(aBayesQR_001_haps, method = "ClustalOmega"),
-  aBayesQR_001_ClustalW = msa::msa(aBayesQR_001_haps, method = "ClustalW"),
+    abqr001_haps <- Biostrings::readDNAStringSet(files)
+    abqr001_haps
+  },
+  abqr001_Muscle = msa::msa(inputSeqs = abqr001_haps, method = "Muscle"),
+  abqr001_ClustalO = msa::msa(abqr001_haps, method = "ClustalOmega"),
+  abqr001_ClustalW = msa::msa(abqr001_haps, method = "ClustalW"),
+  
+  # Convert the alignments from msa to phangorn::phyDat format
+  abqr001_Muscle_phyDat = abqr001_Muscle %>% msa::msaConvert(type = "phangorn::phyDat"),
+  abqr001_ClustalO_phyDat = abqr001_ClustalO %>% msa::msaConvert("phangorn::phyDat"),
+  abqr001_ClustalW_phyDat = abqr001_ClustalW %>% msa::msaConvert("phangorn::phyDat"),
+    
+  # Calculate distance matrices
+  abqr001_Muscle_dml = abqr001_Muscle_phyDat %>% phangorn::dist.ml(),
+  abqr001_Muscle_ddna = abqr001_Muscle_phyDat %>% ape::dist.dna(),
+  abqr001_ClustalO_dml = abqr001_ClustalO_phyDat %>% phangorn::dist.ml(),
+  abqr001_ClustalO_ddna = abqr001_ClustalO_phyDat %>% ape::dist.dna(),
+  abqr001_ClustalW_dml = abqr001_ClustalW_phyDat %>% phangorn::dist.ml(),
+  abqr001_ClustalW_ddna = abqr001_ClustalW_phyDat %>% ape::dist.dna(),
+  
+  # Make UPGMA trees
+  abqr001_Muscle_dml_upgma = abqr001_Muscle_dml %>% phangorn::upgma() %>% ape::ladderize(),
+  abqr001_ClustalO_dml_upgma = abqr001_ClustalO_dml %>% phangorn::upgma() %>% ape::ladderize(),
+  abqr001_ClustalW_dml_upgma = abqr001_ClustalW_dml %>% phangorn::upgma() %>% ape::ladderize(),
+  abqr001_Muscle_dml_nj = abqr001_Muscle_dml %>% phangorn::NJ() %>% ape::ladderize(),
+  abqr001_ClustalO_dml_nj = abqr001_ClustalO_dml %>% phangorn::NJ() %>% ape::ladderize(),
+  abqr001_ClustalW_dml_nj = abqr001_ClustalW_dml %>% phangorn::NJ() %>% ape::ladderize(),
+  
+  # Compare the trees
+  # phangorn::densiTree()
+  # trees = c(
+  #     abqr001_Muscle_dml_upgma,
+  #     abqr001_ClustalO_dml_upgma,
+  #     abqr001_ClustalW_dml_upgma),
+  
+  trees = {
+    tree <- ape::rmtree(1, 10)
+    c(tree, tree, tree)
+  },
+  
+  # abqr_001_trspc = treespace::treespace(trees, nf = 2),
+  
+  # abqr_001_trspc = {
+    # trees <- list(
+    #   abqr001_Muscle_dml_upgma,
+    #   abqr001_ClustalO_dml_upgma,
+    #   abqr001_ClustalW_dml_upgma
+      # abqr001_Muscle_dml_nj,
+      # abqr001_ClustalO_dml_nj,
+      # abqr001_ClustalW_dml_nj
+    # )
+    # class(trees) <- "multiPhylo"
+  #   abqr_001_trspc <- treespace::treespace(trees)
+  #   abqr_001_trspc
+  # },
   
   # Make report
   report = rmarkdown::render(
     input = drake::knitr_in("test_report.Rmd"),
     output_file = drake::file_out("test_report.html"),
     quiet = T
-    )
+  )
 )
 drake::outdated(plan)
 drake::make(plan, jobs = 8)

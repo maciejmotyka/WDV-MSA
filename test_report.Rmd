@@ -13,18 +13,25 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-```{r}
-drake::readd(aBayesQR_001_haps)
+# aBayesQR trees
+
+```{r fig.height=10}
+drake::loadd(abqr001_Muscle_dml_upgma)
+plot(abqr001_Muscle_dml_upgma, main = "Muscle -> dist.ml -> upgma")
 ```
 
-```{r}
-drake::loadd(aBayesQR_001_ClustalO)
-print(aBayesQR_001_ClustalO)
+```{r fig.height=10}
+drake::loadd(abqr001_ClustalO_dml_upgma)
+plot(abqr001_ClustalO_dml_upgma, main = "ClustalO -> dist.ml -> upgma")
 ```
 
-```{r}
-drake::loadd(aBayesQR_001_ClustalW)
-print(aBayesQR_001_ClustalW)
+```{r fig.height=10}
+drake::loadd(abqr001_ClustalW_dml_upgma)
+plot(abqr001_ClustalW_dml_upgma, main = "ClustalW -> dist.ml -> upgma")
 ```
 
-
+## Heatmap
+#```{r}
+#drake::loadd(abqr_001_trspc)
+#adegraphics::table.image(abqr_001_trspc$D)
+#```
