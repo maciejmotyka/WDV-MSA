@@ -1,0 +1,63 @@
+---
+title: "Scratchpad"
+output: html_notebook
+---
+
+```{r}
+drake::loadd(all_haps)
+names(all_haps[[1]]) %>% 
+  stringr::str_remove_all(" ") %>% 
+  stringr::str_remove("freq:") %>%
+  stringr::str_remove("_bwa") %>%
+  stringr::str_replace("strain", "h") %>%
+  stringr::str_c("s", .) %>% 
+  tibble::enframe(name = NULL) %>%
+  tidyr::separate(value, into = c("sample", "hapl", "freq"), sep = "_") %>%
+  dplyr::mutate(freq = freq %>% 
+                as.numeric() %>% 
+                magrittr::multiply_by(100) %>%  
+                round(1)) %>%
+  tidyr::unite(col = ids, remove = FALSE)
+```
+```{r}
+drake::loadd(all_haps)
+names(all_haps[[2]]) %>% 
+  str_c("s", .) %>%
+  str_remove("bwa") %>% 
+  str_remove("fr_") %>%
+  tibble::enframe(name = NULL) %>%
+  tidyr::separate(value, into = c("sample", "hapl", "freq"), sep = "_") %>%
+  dplyr::mutate(freq = freq %>% as.numeric() %>% round(3) * 100) %>% 
+  dplyr::mutate(hapl = as.numeric(hapl) %>% 
+                magrittr::add(1) %>% 
+                as.character() %>% 
+                str_c("h", .)) %>% 
+  tidyr::unite(col = ids, remove = FALSE)
+```
+```{r}
+drake::loadd(all_haps)
+names(all_haps[[2]])
+names(all_haps[[2]]) %<>% 
+  str_c("s", .) %>%
+  str_remove("bwa") %>% 
+  str_remove("fr_") %>%
+  tibble::enframe(name = NULL) %>%
+  tidyr::separate(value, into = c("sample", "hapl", "freq"), sep = "_") %>%
+  dplyr::mutate(freq = freq %>% as.numeric() %>% round(3) * 100) %>% 
+  dplyr::mutate(hapl = as.numeric(hapl) %>% 
+                magrittr::add(1) %>%
+                as.character() %>%
+                str_c("h", .)) %>% 
+  tidyr::unite(col = ids) %>% 
+  dplyr::pull(ids) #%>% 
+  # setNames(object = all_haps[[2]])
+
+names(all_haps[[2]])
+all_haps[[2]]
+```
+
+```{r}
+clean_names_abqr(all_haps[[1]])
+all_haps
+```
+
