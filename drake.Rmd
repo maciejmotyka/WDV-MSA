@@ -3,116 +3,21 @@ title: "R Notebook"
 output: html_notebook
 ---
 
+Packages to remove:
+txtplot
+ggraph
+Hmisc
+
 ```{r}
-library(msa, quietly = T)
-library(magrittr, quietly = T)
-source("functions.R")
-
-plan <- drake::drake_plan(
-    
-    haps = target(
-        read_function(path = drake::file_in(path)),
-        transform = map(
-            path = c(
-                "/home/lejno/Desktop/aBayesQR-nf/out_bwa_001/haplotypes",
-                "/home/lejno/Desktop/cliqueSNV-nf/out_t5_tf001/haplotypes",
-                "/home/lejno/Desktop/cliqueSNV-nf/out_t5_tf01/haplotypes",
-                "/home/lejno/Desktop/cliqueSNV-nf/out_t10_tf01/haplotypes"
-            ),
-            read_function = !!rlang::syms(
-                c(
-                    "read_haps_abqr",
-                    "read_haps_csnv",
-                    "read_haps_csnv",
-                    "read_haps_csnv"
-                )
-            ),
-            # .id = c("abqr_001",
-            #         "csnv_t5_tf001",
-            #         "csnv_t5_tf01",
-            #         "csnv_t10_tf01")
-            .id = path
-        )
-    ), 
-    
-    # Align aBayes_001 haps using Muscle, ClustalO and ClustalW with default settings
-    # Convert the alignments from msa to phangorn::phyDat format
-    
-    abqr001_aligned = target(
-        align_convert(haps, alignMethod = methods, convertTo = "phangorn::phyDat"),
-        transform = cross(haps,
-                        methods = c("Muscle", "ClustalOmega", "ClustalW"))
-    ),
-
-    # abqr001_mlDist = target(
-    #   phangorn::dist.ml(x = alignments),
-    #   transform = map(alignments = c(abqr001_aligned[[1]],
-    #                                  abqr001_aligned[[2]],
-    #                                  abqr001_aligned[[3]]))
-    # ),
-    
-    # abqr001_Muscle_phyDat = abqr001_Muscle %>% msa::msaConvert(type = "phangorn::phyDat"),
-    # abqr001_ClustalO_phyDat = abqr001_ClustalO %>% msa::msaConvert("phangorn::phyDat"),
-    # abqr001_ClustalW_phyDat = abqr001_ClustalW %>% msa::msaConvert("phangorn::phyDat"),
-    
-    # Calculate distance matrices
-    # abqr001_Muscle_dml = abqr001_Muscle_phyDat %>% phangorn::dist.ml(),
-    # abqr001_Muscle_ddna = abqr001_Muscle_phyDat %>% ape::dist.dna(),
-    # abqr001_ClustalO_dml = abqr001_ClustalO_phyDat %>% phangorn::dist.ml(),
-    # abqr001_ClustalO_ddna = abqr001_ClustalO_phyDat %>% ape::dist.dna(),
-    # abqr001_ClustalW_dml = abqr001_ClustalW_phyDat %>% phangorn::dist.ml(),
-    # abqr001_ClustalW_ddna = abqr001_ClustalW_phyDat %>% ape::dist.dna(),
-    # 
-    # # Make UPGMA trees
-    # abqr001_Muscle_dml_upgma = abqr001_Muscle_dml %>% phangorn::upgma() %>% ape::ladderize(),
-    # abqr001_ClustalO_dml_upgma = abqr001_ClustalO_dml %>% phangorn::upgma() %>% ape::ladderize(),
-    # abqr001_ClustalW_dml_upgma = abqr001_ClustalW_dml %>% phangorn::upgma() %>% ape::ladderize(),
-    # abqr001_Muscle_dml_nj = abqr001_Muscle_dml %>% phangorn::NJ() %>% ape::ladderize(),
-    # abqr001_ClustalO_dml_nj = abqr001_ClustalO_dml %>% phangorn::NJ() %>% ape::ladderize(),
-    # abqr001_ClustalW_dml_nj = abqr001_ClustalW_dml %>% phangorn::NJ() %>% ape::ladderize(),
-    # 
-    # # Compare the trees
-    # trees = c(
-    #     abqr001_Muscle_dml_upgma,
-    #     abqr001_ClustalO_dml_upgma,
-    #     abqr001_ClustalW_dml_upgma),
-    
-    # trees = {
-    #   tree <- ape::rmtree(1, 10)
-    #   c(tree, tree, tree)
-    # },
-    
-    # abqr_001_trspc = treespace::treespace(trees, nf = 2),
-    
-    # abqr_001_trspc = {
-    # trees <- list(
-    #   abqr001_Muscle_dml_upgma,
-    #   abqr001_ClustalO_dml_upgma,
-    #   abqr001_ClustalW_dml_upgma
-    # abqr001_Muscle_dml_nj,
-    # abqr001_ClustalO_dml_nj,
-    # abqr001_ClustalW_dml_nj
-    # )
-    # class(trees) <- "multiPhylo"
-    #   abqr_001_trspc <- treespace::treespace(trees)
-    #   abqr_001_trspc
-    # },
-    
-    # Make report
-    # report = rmarkdown::render(
-    #   input = drake::knitr_in("report.Rmd"),
-    #   output_file = drake::file_out("report.html"),
-    #   quiet = T)
-)
-drake::outdated(plan)
-drake::make(plan, jobs = 8, keep_going = T)
+drake::r_outdated()
 ```
 
 ```{r}
-drake::vis_drake_graph(plan, hover = TRUE) 
-```
-```{r}
-drake::sankey_drake_graph(plan)
+drake::r_vis_drake_graph(hover = TRUE, targets_only = TRUE)
+drake::r_sankey_drake_graph()
 ```
 
+```{r}
+drake::r_make()
+```
 

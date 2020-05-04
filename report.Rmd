@@ -17,28 +17,45 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ```
 
 # aBayesQR trees
-
 ```{r fig.height=10, fig.width=15}
-drake::loadd(c("abqr001_Muscle_dml_upgma", "abqr001_ClustalO_dml_upgma", "abqr001_ClustalW_dml_upgma"))
+drake::loadd("nj_mlDist_ClustO_abqr_001", "nj_mlDist_ClustW_abqr_001", "nj_mlDist_Muscl_abqr_001")
 par(mfrow = c(1,3))
-ape::plot.phylo(abqr001_Muscle_dml_upgma, main = "Muscle -> dist.ml -> upgma", use.edge.length = FALSE, cex = 1)
-ape::plot.phylo(abqr001_ClustalO_dml_upgma, main = "ClustalO -> dist.ml -> upgma", use.edge.length = FALSE, cex = 1)
-ape::plot.phylo(abqr001_ClustalW_dml_upgma, main = "ClustalW -> dist.ml -> upgma", use.edge.length = FALSE, cex = 1)
+ape::plot.phylo(nj_mlDist_ClustO_abqr_001, main = "ClustalO -> dist.ml -> NJ", use.edge.length = F, cex = 1.3)
+ape::plot.phylo(nj_mlDist_ClustW_abqr_001, main = "ClustalW -> dist.ml -> NJ", use.edge.length = F, cex = 1.3)
+ape::plot.phylo(nj_mlDist_Muscl_abqr_001, main = "Muscle -> dist.ml -> NJ", use.edge.length = F, cex = 1.3)
 ```
  
 ```{r fig.height=10, fig.keep='all', fig.show='hold'}
-drake::loadd(c("abqr001_Muscle_dml_upgma", "abqr001_ClustalO_dml_upgma", "abqr001_ClustalW_dml_upgma"))
+rm(list = ls())
+# drake::loadd("nj_mlDist_ClustO_abqr_001",
+#              "nj_mlDist_ClustW_abqr_001",
+#              "nj_mlDist_Muscl_abqr_001")
+trees <- c("nj_mlDist_ClustO_abqr_001",
+             "nj_mlDist_ClustW_abqr_001",
+             "nj_mlDist_Muscl_abqr_001")
+drake::loadd(list = !!! rlang::syms(trees[]))
+drake::loadd(list = as.symbol(c("nj_mlDist_ClustO_abqr_001", "nj_mlDist_ClustW_abqr_001")))
+ls()
 
-treespace::plotTreeDiff(tr1 = abqr001_Muscle_dml_upgma,
-                       tr2 = abqr001_ClustalO_dml_upgma,
+syms <- list(nj_mlDist_ClustO_abqr_001,
+              nj_mlDist_ClustW_abqr_001,
+              nj_mlDist_Muscl_abqr_001)
+
+rooted_trees <- lapply(X = trees,
+                       FUN = ape::root.phylo,
+                       outgroup = "s05_h1_57",
+                       resolve.root = T)
+
+treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
+                       tr2 = rooted_trees[[2]],
                        use.edge.length = FALSE,
                        treesFacing = TRUE,
                        colourMethod = "palette",
                        palette = adegenet::funky,
                        tipMatch = FALSE) # defaults to TRUE; disable when using ladderized treesD
 
-treespace::plotTreeDiff(tr1 = abqr001_ClustalW_dml_upgma,
-                       tr2 = abqr001_ClustalO_dml_upgma,
+treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
+                       tr2 = rooted_trees[[3]],
                        use.edge.length = FALSE,
                        treesFacing = TRUE,
                        colourMethod = "palette",
@@ -47,14 +64,31 @@ treespace::plotTreeDiff(tr1 = abqr001_ClustalW_dml_upgma,
 ```
 
 ```{r fig.height=15, fig.width=12}
-drake::loadd(trees)
-phangorn::densiTree(trees,
-                   type = "cladogram",
+rm(list = ls())
+# drake::loadd("nj_mlDist_ClustO_abqr_001", "nj_mlDist_ClustW_abqr_001", "nj_mlDist_Muscl_abqr_001")
+# trees <- Hmisc::llist(nj_mlDist_ClustO_abqr_001,
+#            nj_mlDist_ClustW_abqr_001,
+#            nj_mlDist_Muscl_abqr_001)
+trees <- c("nj_mlDist_ClustO_abqr_001",
+           "nj_mlDist_ClustW_abqr_001",
+           "nj_mlDist_Muscl_abqr_001")
+drake::loadd(trees[])
+ls()
+
+# trees <- c(c(nj_mlDist_ClustO_abqr_001,
+#              nj_mlDist_ClustW_abqr_001,
+#              nj_mlDist_Muscl_abqr_001))
+
+tr2 <- as.vector(trees,)
+tr2
+
+phangorn::densiTree(tr2,
+                   type = "p",
                    scaleX = T,
                    # jitter = list(amount = 0.05, random = FALSE),
                    alpha = 0.5,
                    col = c("red", "green", "blue"),
-                   use.edge.length = FALSE
+                   use.edge.length = T
                    )
 ```
 
@@ -64,3 +98,7 @@ phangorn::densiTree(trees,
 #drake::loadd(abqr_001_trspc)
 #adegraphics::table.image(abqr_001_trspc$D)
 #```
+
+```{r session_info, include=TRUE, echo=TRUE, results='markup'}
+sessioninfo::session_info()
+```
