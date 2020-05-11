@@ -1,6 +1,6 @@
 plan <- drake::drake_plan(
     
-    # Read haplotype seqs and clean their names 
+    # Read haplotype seqs and clean their names ####
     haps = target(
         read_function(path = drake::file_in(path)),
         transform = map(
@@ -25,7 +25,7 @@ plan <- drake::drake_plan(
         )
     ), 
     
-    # Align the haps using Muscle, ClustalO and ClustalW with default settings
+    # Align the haps using Muscle, ClustalO and ClustalW with default settings ####
     aln = target(
         msa::msa(inputSeqs = haps, method = methods),
         transform = cross(
@@ -43,30 +43,31 @@ plan <- drake::drake_plan(
         )
     ),
     
-    #Calculate distance matrices
+    # Calculate distance matrices ####
     mlDist = target(
         msa::msaConvert(aln, type = "phangorn::phyDat") %>%
             phangorn::dist.ml(),
         transform = map(aln)
     ),
-                            
+    # FIXME: returns a matrix of NaNs; ask at biostars 
     dnaDist = target(msa::msaConvert(aln, type = "ape::DNAbin") %>%
                          ape::dist.dna(),
                      transform = map(aln)
     ),
 
-    # # Construct NJ trees
     # nj_mlDist = target(phangorn::NJ(mlDist) %>% ape::ladderize(),
     #                    transform = map(mlDist,
     #                                    .id = c(ids2, ids))),
     # 
+    # Construct NJ trees ####
+    # FIXME: fix msaConvert(type = "ape::DNAbin") 
     # nj_dnaDist = target(phangorn::NJ(dnaDist) %>% ape::ladderize(),
     #                     transform = map(dnaDist,
     #                                     .id = c(ids2, ids)))
     # 
     
     
-    # Make UPGMA trees
+    # Make UPGMA trees ####
     # abqr001_Muscle_dml_upgma = abqr001_Muscle_dml %>% phangorn::upgma() %>% ape::ladderize(),
     # abqr001_ClustalO_dml_upgma = abqr001_ClustalO_dml %>% phangorn::upgma() %>% ape::ladderize(),
     # abqr001_ClustalW_dml_upgma = abqr001_ClustalW_dml %>% phangorn::upgma() %>% ape::ladderize(),
@@ -101,7 +102,7 @@ plan <- drake::drake_plan(
     #   abqr_001_trspc
     # },
     
-    # Make report
+    # Make report ####
     # report = rmarkdown::render(
     #   input = drake::knitr_in("report.Rmd"),
     #   output_file = drake::file_out("report.html"),
