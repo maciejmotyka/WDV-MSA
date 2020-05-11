@@ -148,10 +148,15 @@
     },
     "drake": {
       "Package": "drake",
-      "Version": "7.12.0",
-      "Source": "Repository",
-      "Repository": "CRAN",
-      "Hash": "56abc5fbb1031d6eb69808a17af3d60e"
+      "Version": "7.12.0.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "ropensci",
+      "RemoteRepo": "drake",
+      "RemoteRef": "master",
+      "RemoteSha": "cbbb05973480b92e87cc3380ce3f3994bf3caec9",
+      "Hash": "ecb24a2b9844a618f43ffcb6ddc1e9bd"
     },
     "ellipsis": {
       "Package": "ellipsis",
@@ -287,10 +292,10 @@
     },
     "pillar": {
       "Package": "pillar",
-      "Version": "1.4.3",
+      "Version": "1.4.4",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "fa3ed60396b6998d0427c57dab90fba4"
+      "Hash": "b01d2494d0e2b6b02fae40e1543fbcb0"
     },
     "pkgconfig": {
       "Package": "pkgconfig",
@@ -322,10 +327,10 @@
     },
     "renv": {
       "Package": "renv",
-      "Version": "0.9.3",
+      "Version": "0.10.0",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "c1a367437d8a8a44bec4b9d4974cb20c"
+      "Hash": "0d3f1c2b63e70b3d918246b4e2ca59b7"
     },
     "rlang": {
       "Package": "rlang",
@@ -371,10 +376,10 @@
     },
     "tidyr": {
       "Package": "tidyr",
-      "Version": "1.0.2",
+      "Version": "1.0.3",
       "Source": "Repository",
       "Repository": "CRAN",
-      "Hash": "fb73a010ace00d6c584c2b53a21b969c"
+      "Hash": "df860e8e4e1a1b454f18537c8bc96211"
     },
     "tidyselect": {
       "Package": "tidyselect",
