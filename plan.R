@@ -55,11 +55,26 @@ plan <- drake::drake_plan(
                      transform = map(aln)
     ),
 
-    # nj_mlDist = target(phangorn::NJ(mlDist) %>% ape::ladderize(),
-    #                    transform = map(mlDist,
-    #                                    .id = c(ids2, ids))),
-    # 
     # Construct NJ trees ####
+    nj_mlDist = target(
+        phangorn::NJ(mlDist) %>%
+            ape::ladderize(),
+        transform = map(
+            mlDist,
+            .names = outer(
+                c("Muscle", "ClustO", "ClustW"),
+                c("abqr_001",
+                  "csnv_t5_tf001",
+                  "csnv_t5_tf01",
+                  "csnv_t10_tf01"),
+                paste,
+                sep = "_"
+            ) %>%
+                paste("nj_mlDist", ., sep = "_") %>%
+                as.vector()
+        )
+    ),
+    
     # FIXME: fix msaConvert(type = "ape::DNAbin") 
     # nj_dnaDist = target(phangorn::NJ(dnaDist) %>% ape::ladderize(),
     #                     transform = map(dnaDist,
