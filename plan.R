@@ -118,8 +118,15 @@ plan <- drake::drake_plan(
     # },
     
     # Make report ####
-    # report = rmarkdown::render(
-    #   input = drake::knitr_in("report.Rmd"),
-    #   output_file = drake::file_out("report.html"),
-    #   quiet = T)
+    report = rmarkdown::render(
+      input = drake::knitr_in("report.Rmd"),
+      output_file = drake::file_out("report.html"),
+      quiet = T)
+    # report = callr::r(  
+    #   function(...) rmarkdown::render(...),
+    #   args = list(
+    #     input = drake::knitr_in("report.Rmd"),
+    #     output_file = drake::file_out("report.html"),
+    #     quiet = T)
+    # )
 )
