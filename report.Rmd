@@ -6,7 +6,7 @@ output:
   html_document:
     toc: true
     toc_float: true
-    toc_depth: 2
+    toc_depth: 3
     code_folding: "hide"
     # theme: darkly
     #css: styles.css
@@ -17,34 +17,60 @@ knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ```
 
 # aBayesQR trees
+## ml.dist -> NJ trees {.tabset}
+### Side by side (demo)
+Just a showcase - use densiTree if there are no big differences between the trees.
 ```{r fig.height=10, fig.width=15}
-drake::loadd("nj_mlDist_ClustO_abqr_001", "nj_mlDist_ClustW_abqr_001", "nj_mlDist_Muscl_abqr_001")
-par(mfrow = c(1,3))
-ape::plot.phylo(nj_mlDist_ClustO_abqr_001, main = "ClustalO -> dist.ml -> NJ", use.edge.length = F, cex = 1.3)
-ape::plot.phylo(nj_mlDist_ClustW_abqr_001, main = "ClustalW -> dist.ml -> NJ", use.edge.length = F, cex = 1.3)
-ape::plot.phylo(nj_mlDist_Muscl_abqr_001, main = "Muscle -> dist.ml -> NJ", use.edge.length = F, cex = 1.3)
-```
- 
-```{r fig.height=10, fig.keep='all', fig.show='hold'}
-rm(list = ls())
-# drake::loadd("nj_mlDist_ClustO_abqr_001",
-#              "nj_mlDist_ClustW_abqr_001",
-#              "nj_mlDist_Muscl_abqr_001")
-trees <- c("nj_mlDist_ClustO_abqr_001",
+drake::loadd("nj_mlDist_ClustO_abqr_001",
              "nj_mlDist_ClustW_abqr_001",
-             "nj_mlDist_Muscl_abqr_001")
-drake::loadd(list = !!! rlang::syms(trees[]))
-drake::loadd(list = as.symbol(c("nj_mlDist_ClustO_abqr_001", "nj_mlDist_ClustW_abqr_001")))
-ls()
+             "nj_mlDist_Muscle_abqr_001")
 
-syms <- list(nj_mlDist_ClustO_abqr_001,
-              nj_mlDist_ClustW_abqr_001,
-              nj_mlDist_Muscl_abqr_001)
+trees <- c(nj_mlDist_ClustO_abqr_001,
+           nj_mlDist_ClustW_abqr_001,
+           nj_mlDist_Muscle_abqr_001)
 
 rooted_trees <- lapply(X = trees,
                        FUN = ape::root.phylo,
                        outgroup = "s05_h1_57",
                        resolve.root = T)
+
+par(mfrow = c(1,3))
+ape::plot.phylo(rooted_trees[[1]],
+                main = "ClustalO -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+
+ape::plot.phylo(rooted_trees[[2]],
+                main = "ClustalW -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+
+ape::plot.phylo(rooted_trees[[3]],
+                main = "Muscle -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+```
+
+### Pairwise comparison (demo)
+Just a showcase - use densiTree if there are no big differences between the trees.
+```{r fig.height=10, fig.keep='all', fig.show='hold'}
+drake::loadd("nj_mlDist_ClustO_abqr_001",
+             "nj_mlDist_ClustW_abqr_001",
+             "nj_mlDist_Muscle_abqr_001")
+
+trees <- c(nj_mlDist_ClustO_abqr_001,
+           nj_mlDist_ClustW_abqr_001,
+           nj_mlDist_Muscle_abqr_001)
+
+rooted_trees <- lapply(X = trees,
+                       FUN = ape::root.phylo,
+                       outgroup = "s05_h1_57",
+                       resolve.root = T)
+
+class(rooted_trees) <- "multiPhylo"
 
 treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
                        tr2 = rooted_trees[[2]],
@@ -63,42 +89,62 @@ treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
                        tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
 ```
 
+### densiTree
+Theres a perfect topological agreement between the Muscle, ClustalO, and ClustalW aligned dist.ml distance NJ trees. There are minor branch length differences, mostly in the distance of between WDV-B and WDV-W. ClustalO shows bigger distance than ClustalW and Muscle which show similar distance.
+
+Tree on the left shows true edge lengths. s05 represents WDV-B and is very distant from other sequences which are all WDV-W. Among the WDV-W only s09 forms its own clade which makes sense, as it is the only sample which comes solely from one plant. This clade is the most dissimilar among the WDV-W clades, it includes s09-h3 which is the most distinct haplotype among WDV-W.
+
+Tree on the right doesn't show true distances, but presents the topology much better. s14 and s15 almost form separate clades, in spite of having multiple haplotypes.
 ```{r fig.height=15, fig.width=12}
-rm(list = ls())
-# drake::loadd("nj_mlDist_ClustO_abqr_001", "nj_mlDist_ClustW_abqr_001", "nj_mlDist_Muscl_abqr_001")
-# trees <- Hmisc::llist(nj_mlDist_ClustO_abqr_001,
-#            nj_mlDist_ClustW_abqr_001,
-#            nj_mlDist_Muscl_abqr_001)
-trees <- c("nj_mlDist_ClustO_abqr_001",
-           "nj_mlDist_ClustW_abqr_001",
-           "nj_mlDist_Muscl_abqr_001")
-drake::loadd(trees[])
-ls()
+drake::loadd("nj_mlDist_ClustO_abqr_001",
+             "nj_mlDist_ClustW_abqr_001",
+             "nj_mlDist_Muscle_abqr_001")
 
-# trees <- c(c(nj_mlDist_ClustO_abqr_001,
-#              nj_mlDist_ClustW_abqr_001,
-#              nj_mlDist_Muscl_abqr_001))
+trees <- c(c(nj_mlDist_ClustO_abqr_001,
+             nj_mlDist_ClustW_abqr_001,
+             nj_mlDist_Muscle_abqr_001))
 
-tr2 <- as.vector(trees,)
-tr2
+rooted_trees <- lapply(X = trees,
+                       FUN = ape::root.phylo,
+                       outgroup = "s05_h1_57",
+                       resolve.root = T)
 
-phangorn::densiTree(tr2,
+class(rooted_trees) <- "multiPhylo"
+
+par(mfrow = c(1, 2))
+# Shows true distances between sequences, but makes hard to assess the similarity of topologies
+phangorn::densiTree(rooted_trees,
                    type = "p",
-                   scaleX = T,
+                   scaleX = F,
                    # jitter = list(amount = 0.05, random = FALSE),
                    alpha = 0.5,
                    col = c("red", "green", "blue"),
-                   use.edge.length = T
+                   use.edge.length = T,
+                   scale.bar = F
                    )
+title("True distances")
+
+# Shows well how similar the topologies are, doesn't show true distances between sequences
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = T,
+                   jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = F,
+                   label.offset = 0.01,
+                   scale.bar = F
+                   )
+title("Scaled? distances")
 ```
 
+<!-- ## Heatmap -->
+<!-- ```{r} -->
+<!-- drake::loadd(abqr_001_trspc) -->
+<!-- adegraphics::table.image(abqr_001_trspc$D) -->
+<!-- ``` -->
 
-## Heatmap
-#```{r}
-#drake::loadd(abqr_001_trspc)
-#adegraphics::table.image(abqr_001_trspc$D)
-#```
-
+# Session info
 ```{r session_info, include=TRUE, echo=TRUE, results='markup'}
 sessioninfo::session_info()
 ```
