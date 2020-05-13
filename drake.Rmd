@@ -3,11 +3,6 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-Packages to remove:
-txtplot
-ggraph
-Hmisc
-
 ```{r}
 drake::r_outdated()
 ```
@@ -21,3 +16,11 @@ drake::r_sankey_drake_graph()
 drake::r_make()
 ```
 
+```{r}
+rm(list = ls())
+source("packages.R")
+source("functions.R")
+source("plan.R")
+ls()
+drake::make(plan)
+```
