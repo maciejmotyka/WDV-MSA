@@ -16,11 +16,16 @@ output:
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
 ```
 
-# aBayesQR trees
-## ml.dist -> NJ trees {.tabset}
-### Side by side (demo)
-Just a showcase - use densiTree if there are no big differences between the trees.
-```{r fig.height=10, fig.width=15}
+# Comparing ClustalW, ClustalO and Muscle alignments
+## aBayesQR ml.dist -> NJ trees {.tabset}
+Theres a perfect topological agreement between the Muscle, ClustalO, and ClustalW aligned dist.ml distance NJ trees. There are minor branch length differences, mostly in the distance of between WDV-B and WDV-W. ClustalO shows bigger distance than ClustalW and Muscle which show similar distance.
+
+Tree on the left shows true edge lengths. s05 represents WDV-B and is very distant from other sequences which are all WDV-W. Among the WDV-W only s09 forms its own clade which makes sense, as it is the only sample which comes solely from one plant. This clade is the most dissimilar among the WDV-W clades, it includes s09-h3 which is the most distinct haplotype among WDV-W.
+
+Tree on the right doesn't show true distances, but presents the topology much better. s14 and s15 almost form separate clades, in spite of having multiple haplotypes.
+
+### densiTree true distances
+```{r fig.height=15, fig.width=12}
 drake::loadd("nj_mlDist_ClustO_abqr_001",
              "nj_mlDist_ClustW_abqr_001",
              "nj_mlDist_Muscle_abqr_001")
@@ -34,6 +39,57 @@ rooted_trees <- lapply(X = trees,
                        outgroup = "s05_h1_57",
                        resolve.root = T)
 
+class(rooted_trees) <- "multiPhylo"
+
+# Shows true distances between sequences, but makes hard to assess the similarity of topologies
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = F,
+                   # jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = T,
+                   scale.bar = F
+                   )
+title("True distances")
+```
+
+### densiTree scaled distances
+```{r fig.height=20}
+# Shows well how similar the topologies are, doesn't show true distances between sequences
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = T,
+                   jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = F,
+                   label.offset = 0.01,
+                   scale.bar = F
+                   )
+title("Scaled distances")
+```
+
+## CliqueSNV t10 tf01 ml.dist -> NJ trees {.tabset}
+```{r load and root csnv t10 tf01 trees}
+drake::loadd("nj_mlDist_ClustO_csnv_t10_tf01",
+             "nj_mlDist_ClustW_csnv_t10_tf01",
+             "nj_mlDist_Muscle_csnv_t10_tf01")
+
+trees <- c(nj_mlDist_ClustO_csnv_t10_tf01,
+           nj_mlDist_ClustW_csnv_t10_tf01,
+           nj_mlDist_Muscle_csnv_t10_tf01)
+
+rooted_trees <- lapply(X = trees,
+                       FUN = ape::root.phylo,
+                       outgroup = trees[[1]]$tip.label %>% grep("s05_h1", ., value = T),
+                       resolve.root = T)
+
+class(rooted_trees) <- "multiPhylo"
+```
+
+### Side by side
+```{r fig.height=20, fig.width=15}
 par(mfrow = c(1,3))
 ape::plot.phylo(rooted_trees[[1]],
                 main = "ClustalO -> dist.ml -> NJ",
@@ -54,24 +110,8 @@ ape::plot.phylo(rooted_trees[[3]],
                 label.offset = 0.5)
 ```
 
-### Pairwise comparison (demo)
-Just a showcase - use densiTree if there are no big differences between the trees.
-```{r fig.height=10, fig.keep='all', fig.show='hold'}
-drake::loadd("nj_mlDist_ClustO_abqr_001",
-             "nj_mlDist_ClustW_abqr_001",
-             "nj_mlDist_Muscle_abqr_001")
-
-trees <- c(nj_mlDist_ClustO_abqr_001,
-           nj_mlDist_ClustW_abqr_001,
-           nj_mlDist_Muscle_abqr_001)
-
-rooted_trees <- lapply(X = trees,
-                       FUN = ape::root.phylo,
-                       outgroup = "s05_h1_57",
-                       resolve.root = T)
-
-class(rooted_trees) <- "multiPhylo"
-
+### Pairwise ClustO vs ClustW
+```{r fig.height=20, fig.keep='all', fig.show='hold'}
 treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
                        tr2 = rooted_trees[[2]],
                        use.edge.length = FALSE,
@@ -79,7 +119,10 @@ treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
                        colourMethod = "palette",
                        palette = adegenet::funky,
                        tipMatch = FALSE) # defaults to TRUE; disable when using ladderized treesD
+```
 
+### Pairwise ClustO vs Muscle
+```{r fig.height=20}
 treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
                        tr2 = rooted_trees[[3]],
                        use.edge.length = FALSE,
@@ -89,29 +132,19 @@ treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
                        tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
 ```
 
-### densiTree
-Theres a perfect topological agreement between the Muscle, ClustalO, and ClustalW aligned dist.ml distance NJ trees. There are minor branch length differences, mostly in the distance of between WDV-B and WDV-W. ClustalO shows bigger distance than ClustalW and Muscle which show similar distance.
+### Pairwise ClustW vs Muscle
+```{r fig.height=20}
+treespace::plotTreeDiff(tr1 = rooted_trees[[2]],
+                       tr2 = rooted_trees[[3]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
+```
 
-Tree on the left shows true edge lengths. s05 represents WDV-B and is very distant from other sequences which are all WDV-W. Among the WDV-W only s09 forms its own clade which makes sense, as it is the only sample which comes solely from one plant. This clade is the most dissimilar among the WDV-W clades, it includes s09-h3 which is the most distinct haplotype among WDV-W.
-
-Tree on the right doesn't show true distances, but presents the topology much better. s14 and s15 almost form separate clades, in spite of having multiple haplotypes.
-```{r fig.height=15, fig.width=12}
-drake::loadd("nj_mlDist_ClustO_abqr_001",
-             "nj_mlDist_ClustW_abqr_001",
-             "nj_mlDist_Muscle_abqr_001")
-
-trees <- c(c(nj_mlDist_ClustO_abqr_001,
-             nj_mlDist_ClustW_abqr_001,
-             nj_mlDist_Muscle_abqr_001))
-
-rooted_trees <- lapply(X = trees,
-                       FUN = ape::root.phylo,
-                       outgroup = "s05_h1_57",
-                       resolve.root = T)
-
-class(rooted_trees) <- "multiPhylo"
-
-par(mfrow = c(1, 2))
+### densiTree true distances
+```{r fig.height=20, fig.width=12}
 # Shows true distances between sequences, but makes hard to assess the similarity of topologies
 phangorn::densiTree(rooted_trees,
                    type = "p",
@@ -123,7 +156,10 @@ phangorn::densiTree(rooted_trees,
                    scale.bar = F
                    )
 title("True distances")
+```
 
+### densiTree scaled distances
+```{r fig.height=20}
 # Shows well how similar the topologies are, doesn't show true distances between sequences
 phangorn::densiTree(rooted_trees,
                    type = "p",
@@ -138,13 +174,215 @@ phangorn::densiTree(rooted_trees,
 title("Scaled? distances")
 ```
 
-<!-- ## Heatmap -->
-<!-- ```{r} -->
-<!-- drake::loadd(abqr_001_trspc) -->
-<!-- adegraphics::table.image(abqr_001_trspc$D) -->
-<!-- ``` -->
+## CliqueSNV t5 tf01 ml.dist -> NJ trees {.tabset}
+```{r load and root csnv t5 tf01 trees}
+drake::loadd("nj_mlDist_ClustO_csnv_t5_tf01",
+             "nj_mlDist_ClustW_csnv_t5_tf01",
+             "nj_mlDist_Muscle_csnv_t5_tf01")
 
-# Session info
+trees <- c(nj_mlDist_ClustO_csnv_t5_tf01,
+           nj_mlDist_ClustW_csnv_t5_tf01,
+           nj_mlDist_Muscle_csnv_t5_tf01)
+
+rooted_trees <- lapply(X = trees,
+                       FUN = ape::root.phylo,
+                       outgroup = trees[[1]]$tip.label %>% grep("s05_h1", ., value = T),
+                       resolve.root = T)
+
+class(rooted_trees) <- "multiPhylo"
+```
+
+### Side by side
+```{r fig.height=20, fig.width=15}
+par(mfrow = c(1,3))
+ape::plot.phylo(rooted_trees[[1]],
+                main = "ClustalO -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+
+ape::plot.phylo(rooted_trees[[2]],
+                main = "ClustalW -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+
+ape::plot.phylo(rooted_trees[[3]],
+                main = "Muscle -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+```
+
+### Pairwise ClustO vs ClustW
+```{r fig.height=20, fig.keep='all', fig.show='hold'}
+treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
+                       tr2 = rooted_trees[[2]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized treesD
+```
+
+### Pairwise ClustO vs Muscle
+```{r fig.height=20}
+treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
+                       tr2 = rooted_trees[[3]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
+```
+
+### Pairwise ClustW vs Muscle
+```{r fig.height=20}
+treespace::plotTreeDiff(tr1 = rooted_trees[[2]],
+                       tr2 = rooted_trees[[3]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
+```
+
+### densiTree true dist
+```{r fig.height=20, fig.width=12}
+# Shows true distances between sequences, but makes hard to assess the similarity of topologies
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = F,
+                   # jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = T,
+                   scale.bar = F
+                   )
+title("True distances")
+```
+
+### densiTree scaled
+```{r fig.height=20}
+# Shows well how similar the topologies are, doesn't show true distances between sequences
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = T,
+                   jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = F,
+                   label.offset = 0.01,
+                   scale.bar = F
+                   )
+title("Scaled? distances")
+```
+
+## CliqueSNV t5 tf001 ml.dist -> NJ trees {.tabset}
+```{r load and root csnv t5 tf001 trees}
+drake::loadd("nj_mlDist_ClustO_csnv_t5_tf001",
+             "nj_mlDist_ClustW_csnv_t5_tf001",
+             "nj_mlDist_Muscle_csnv_t5_tf001")
+
+trees <- c(nj_mlDist_ClustO_csnv_t5_tf001,
+           nj_mlDist_ClustW_csnv_t5_tf001,
+           nj_mlDist_Muscle_csnv_t5_tf001)
+
+rooted_trees <- lapply(X = trees,
+                       FUN = ape::root.phylo,
+                       outgroup = trees[[1]]$tip.label %>% grep("s05_h1", ., value = T),
+                       resolve.root = T)
+
+class(rooted_trees) <- "multiPhylo"
+```
+
+### Side by side
+```{r fig.height=20, fig.width=15}
+par(mfrow = c(1,3))
+ape::plot.phylo(rooted_trees[[1]],
+                main = "ClustalO -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+
+ape::plot.phylo(rooted_trees[[2]],
+                main = "ClustalW -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+
+ape::plot.phylo(rooted_trees[[3]],
+                main = "Muscle -> dist.ml -> NJ",
+                use.edge.length = F,
+                cex = 1.3,
+                label.offset = 0.5)
+```
+
+### Pairwise ClustO vs ClustW
+```{r fig.height=20, fig.keep='all', fig.show='hold'}
+treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
+                       tr2 = rooted_trees[[2]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized treesD
+```
+
+### Pairwise ClustO vs Muscle
+```{r fig.height=20}
+treespace::plotTreeDiff(tr1 = rooted_trees[[1]],
+                       tr2 = rooted_trees[[3]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
+```
+
+### Pairwise ClustW vs Muscle
+```{r fig.height=20}
+treespace::plotTreeDiff(tr1 = rooted_trees[[2]],
+                       tr2 = rooted_trees[[3]],
+                       use.edge.length = FALSE,
+                       treesFacing = TRUE,
+                       colourMethod = "palette",
+                       palette = adegenet::funky,
+                       tipMatch = FALSE) # defaults to TRUE; disable when using ladderized trees
+```
+
+### densiTree true dist
+```{r fig.height=20, fig.width=12}
+# Shows true distances between sequences, but makes hard to assess the similarity of topologies
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = F,
+                   # jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = T,
+                   scale.bar = F
+                   )
+title("True distances")
+```
+
+### densiTree scaled
+```{r fig.height=20}
+# Shows well how similar the topologies are, doesn't show true distances between sequences
+phangorn::densiTree(rooted_trees,
+                   type = "p",
+                   scaleX = T,
+                   jitter = list(amount = 0.05, random = FALSE),
+                   alpha = 0.5,
+                   col = c("red", "green", "blue"),
+                   use.edge.length = F,
+                   label.offset = 0.01,
+                   scale.bar = F
+                   )
+title("Scaled? distances")
+```
+
+## Session info
 ```{r session_info, include=TRUE, echo=TRUE, results='markup'}
 sessioninfo::session_info()
 ```
